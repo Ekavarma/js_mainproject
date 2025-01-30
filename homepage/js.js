@@ -1,17 +1,4 @@
-// let url="http://localhost:3000/icecreams"
 
-// let alldata=[]
-// // console.log(alldata)
-
-// async function getdata(){
-//     let data =await fetch(url)
-//     // console.log(data)
-//     let data2=await data.json()
-//     console.log(data2)
-//     alldata=data2;
-
-// }
-// getdata()
 
 alldata=[{
     "id":"1",
