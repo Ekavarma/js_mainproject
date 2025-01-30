@@ -37,6 +37,211 @@
         }
 
         .btn {
+            margin: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .btn.increase {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn.decrease {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        a {
+            text-decoration: none;
+            color: none;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="cart-container"></div>
+    <div id="total-container">
+        <strong>Total Amount: ₹<span id="total-amount">0</span></strong>
+        <button id="buy-now" class="btn add-to-cart">Buy Now</button>
+    </div>
+    <button id="btn">
+        <a href="../homepage/html.html">Click here to buy more</a>
+    </button>
+    <script>
+        let cartData = JSON.parse(localStorage.getItem("cartdata")) || [];
+
+        let aggregatedCartData = cartData.reduce((acc, item) => {
+            let existingItem = acc.find(cartItem => cartItem.name === item.name);
+            if (existingItem) {
+                existingItem.quantity += 1;
+                existingItem.totalPrice += item.Price;
+            } else {
+                acc.push({
+                    ...item,
+                    quantity: 1,
+                    totalPrice: item.Price
+                });
+            }
+            return acc;
+        }, []);
+
+        const cartContainer = document.getElementById("cart-container");
+        const totalAmountElement = document.getElementById("total-amount");
+
+        function updateTotalAmount() {
+            const total = aggregatedCartData.reduce((sum, item) => sum + item.totalPrice, 0);
+            totalAmountElement.textContent = total;
+        }
+
+        function displayCartItems() {
+            cartContainer.innerHTML = "";
+            if (aggregatedCartData.length === 0) {
+                cartContainer.innerHTML = `<h2>Your Cart is Empty</h2>`;
+                totalAmountElement.textContent = "0";
+                return;
+            }
+
+            aggregatedCartData.forEach((item, index) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+
+                card.innerHTML = `
+                    <img src="${item.Image}" alt="${item.name}" />
+                    <h2>${item.name}</h2>
+                    <p>Price: ₹${item.Price}</p>
+                    <p>Quantity: ${item.quantity}</p>
+                    <p>Total: ₹${item.totalPrice}</p>
+                    <button class="btn decrease" data-index="${index}">-</button>
+                    <button class="btn increase" data-index="${index}">+</button>
+                `;
+
+                const increaseButton = card.querySelector(".increase");
+                const decreaseButton = card.querySelector(".decrease");
+
+                increaseButton.addEventListener("click", () => increaseQuantity(index));
+                decreaseButton.addEventListener("click", () => decreaseQuantity(index));
+
+                cartContainer.appendChild(card);
+            });
+
+            updateTotalAmount();
+        }
+
+        function increaseQuantity(index) {
+            const item = aggregatedCartData[index];
+            item.quantity += 1;
+            item.totalPrice += item.Price;
+
+            let flatCartData = aggregatedCartData.flatMap(item =>
+                Array(item.quantity).fill({ name: item.name, Price: item.Price, Image: item.Image })
+            );
+            localStorage.setItem("cartdata", JSON.stringify(flatCartData));
+
+            displayCartItems();
+        }
+
+        function decreaseQuantity(index) {
+            const item = aggregatedCartData[index];
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+                item.totalPrice -= item.Price;
+            } else {
+                aggregatedCartData.splice(index, 1);
+            }
+
+            let flatCartData = aggregatedCartData.flatMap(item =>
+                Array(item.quantity).fill({ name: item.name, Price: item.Price, Image: item.Image })
+            );
+            localStorage.setItem("cartdata", JSON.stringify(flatCartData));
+
+            displayCartItems();
+        }
+
+        document.getElementById("buy-now").addEventListener("click", () => {
+            if (aggregatedCartData.length === 0) {
+                alert("Your cart is empty. Add items to proceed.");
+                return;
+            }
+            const totalAmount = aggregatedCartData.reduce((sum, item) => sum + item.totalPrice, 0);
+            const userConfirmed = confirm(`The total amount is ₹${totalAmount}. Do you want to proceed?`);
+            if (userConfirmed) {
+                alert(`Thank you for your purchase! Total Amount: ₹${totalAmount}`);
+
+                aggregatedCartData = [];
+                localStorage.setItem("cartdata", JSON.stringify([]));
+                displayCartItems();
+            } else {
+                alert("Purchase cancelled. You can continue shopping.");
+            }
+        });
+
+        displayCartItems();
+    </script>
+</body>
+
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        #cart-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 25%;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .card img {
+            border-radius: 10px;
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        #total-container {
+            margin: 20px;
+            font-size: 20px;
+            text-align: right;
+        }
+
+        .btn {
             margin: 10px 0;
             padding: 8px 12px;
             border: none;
@@ -201,4 +406,4 @@
     </script>
 </body>
 
-</html>
+</html> -->
